@@ -1,45 +1,88 @@
-const friendlyPlayers = new Map();
+import {
+    SlashCommandBuilder,
+    EmbedBuilder,
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle
+} from 'discord.js';
 
 export default {
-    name: 'friendly_join',
+    data: new SlashCommandBuilder()
+        .setName('friendly')
+        .setDescription('Create an Atleti friendly'),
 
     async execute(interaction) {
-        const messageId = interaction.message.id;
+        const expiresAt = Math.floor(Date.now() / 1000) + 300;
 
-        if (!friendlyPlayers.has(messageId)) {
-            friendlyPlayers.set(messageId, []);
-        }
-
-        const players = friendlyPlayers.get(messageId);
-
-        // Stop the same person from joining twice
-        if (players.includes(interaction.user.id)) {
-            await interaction.reply({
-                content: '⚠️ You are already in this friendly!',
-                ephemeral: true
-            });
-            return;
-        }
-
-        players.push(interaction.user.id);
-
-        const playerList = players
-            .map((id, index) => `${index + 1}. <@${id}>`)
-            .join('\n');
-
-        const embed = interaction.message.embeds[0];
-
-        const updatedEmbed = {
-            ...embed.toJSON(),
-            description:
+        const embed = new EmbedBuilder()
+            .setTitle('⚽ ATLETI FRIENDLY')
+            .setDescription(
                 'A friendly is being organized!\n\n' +
-                `👥 Players: **${players.length}**\n\n` +
-                playerList
-        };
+                '👥 Players: **0/10**\n\n' +
+                'No players have joined yet.\n\n' +
+                `⏱️ Signup closes <t:${expiresAt}:R>`
+            )
+            .setColor(0x1e3a8a)
+            .setFooter({ text: 'Atleti Manager' });
 
-        await interaction.update({
-            embeds: [updatedEmbed],
-            components: interaction.message.components
+        const row = new ActionRowBuilder()
+            .addComponents(
+                new ButtonBuilder()
+                    .setCustomId('friendly_join')
+                    .setLabel('Join Friendly')
+                    .setEmoji('⚽')
+                    .setStyle(ButtonStyle.Primary),
+
+                new ButtonBuilder()
+                    .setCustomId('friendly_leave')
+                    .setLabel('Leave Friendly')
+                    .setEmoji('❌')
+                    .setStyle(ButtonStyle.Danger)
+            );
+
+        const message = await interaction.reply({
+            embeds: [embed],
+            components: [row],
+            fetchReply: true
         });
+
+        // Close signup after 5 minutes
+        setTimeout(async () => {
+            try {
+                const closedEmbed = new EmbedBuilder()
+                    .setTitle('🔒 ATLETI FRIENDLY')
+                    .setDescription(
+                        'Signup is now **closed!**\n\n' +
+                        '👥 Players who joined are listed below.\n\n' +
+                        '🔒 Friendly signup closed'
+                    )
+                    .setColor(0x1e3a8a)
+                    .setFooter({ text: 'Atleti Manager' });
+
+                const disabledRow = new ActionRowBuilder()
+                    .addComponents(
+                        new ButtonBuilder()
+                            .setCustomId('friendly_join')
+                            .setLabel('Join Friendly')
+                            .setEmoji('⚽')
+                            .setStyle(ButtonStyle.Primary)
+                            .setDisabled(true),
+
+                        new ButtonBuilder()
+                            .setCustomId('friendly_leave')
+                            .setLabel('Leave Friendly')
+                            .setEmoji('❌')
+                            .setStyle(ButtonStyle.Danger)
+                            .setDisabled(true)
+                    );
+
+                await message.edit({
+                    embeds: [closedEmbed],
+                    components: [disabledRow]
+                });
+            } catch (error) {
+                console.error('Failed to close friendly:', error);
+            }
+        }, 5 * 60 * 1000);
     }
 };
