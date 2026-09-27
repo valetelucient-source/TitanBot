@@ -94,7 +94,7 @@ export const botConfig = {
   embeds: {
     colors: {
       // Main brand colors.
-      primary: "#722F37"
+      primary: "#722F37",
        
       secondary: "#EFDFBB",
 
