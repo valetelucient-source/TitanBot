@@ -1,5 +1,5 @@
 export default {
-    customId: 'friendly_join',
+    name: 'friendly_join',
 
     async execute(interaction) {
         await interaction.reply({
