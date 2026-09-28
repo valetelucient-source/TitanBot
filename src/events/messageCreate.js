@@ -18,7 +18,7 @@ import {
   isValidCountingMessage,
   recordCorrectCount,
 } from '../services/countingGameService.js';
-
+import { getBotResponse } from '../services/aiService.js';
 const MESSAGE_XP_RATE_LIMIT_ATTEMPTS = 12;
 const MESSAGE_XP_RATE_LIMIT_WINDOW_MS = 10000;
 
@@ -34,7 +34,24 @@ export default {
       if (countingProcessed) {
         return;
       }
+      // Atleti Manager AI chat
+      if (message.channel.id === '1554264459852251227') {
+        try {
+          const response = await getBotResponse(message.content);
 
+          if (response) {
+            await message.reply(response);
+          }
+        } catch (error) {
+          logger.error('AI chat error:', error);
+
+          await message.reply(
+            '⚠️ I had trouble thinking of a response. Try again in a moment!'
+          );
+        }
+
+        return;
+      }
       await handlePrefixCommand(message, client);
 
       await handleLeveling(message, client);
