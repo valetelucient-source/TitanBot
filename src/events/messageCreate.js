@@ -42,13 +42,13 @@ export default {
           if (response) {
             await message.reply(response);
           }
-        } catch (error) {
-          logger.error('AI chat error:', error);
+      } catch (error) {
+  console.error('AI CHAT ERROR:', error);
 
-          await message.reply(
-            '⚠️ I had trouble thinking of a response. Try again in a moment!'
-          );
-        }
+  await message.reply(
+    `⚠️ AI error: ${error?.message || 'Unknown error'}`
+  );
+}
 
         return;
       }
