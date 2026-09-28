@@ -34,6 +34,7 @@ export default {
       if (countingProcessed) {
         return;
       }
+
       // Atleti Manager AI chat
       if (message.channel.id === '1554264459852251227') {
         try {
@@ -42,16 +43,17 @@ export default {
           if (response) {
             await message.reply(response);
           }
-      } catch (error) {
-  console.error('AI CHAT ERROR:', error);
+        } catch (error) {
+          console.error('AI CHAT ERROR:', error);
 
-  await message.reply(
-    `⚠️ AI error: ${error?.message || 'Unknown error'}`
-  );
-}
+          await message.reply(
+            `⚠️ AI error: ${error?.message || 'Unknown error'}`
+          );
+        }
 
         return;
       }
+
       await handlePrefixCommand(message, client);
 
       await handleLeveling(message, client);
@@ -64,11 +66,15 @@ export default {
 async function handlePrefixCommand(message, client) {
   try {
     const guildConfig = await getGuildConfig(client, message.guild.id);
-    const prefix = guildConfig?.prefix || getCommandPrefix();
+    const prefix = getCommandPrefix(guildConfig);
+
+    if (!prefix || !message.content.startsWith(prefix)) {
+      return;
+    }
+
     const parsed = parsePrefixCommand(message.content, prefix);
-    
     if (!parsed) {
-      return; 
+      return;
     }
 
     let { commandName, args } = parsed;
@@ -87,7 +93,7 @@ async function handlePrefixCommand(message, client) {
 
     if (!command) {
       logger.warn(`Command not found: ${resolvedCommandName}`);
-      return; 
+      return;
     }
 
     if (isMaintenanceMode() && !isBotOwner(message.author.id)) {
@@ -156,7 +162,7 @@ async function handlePrefixCommand(message, client) {
     }
 
     logger.info(`Executing prefix command: ${prefix}${commandName} (resolved to ${resolvedCommandName}) by ${message.author.tag}`);
-    
+
     await executePrefixCommand(command, message, args, client, prefix, guildConfig);
   } catch (error) {
     logger.error('Error handling prefix command:', error);
