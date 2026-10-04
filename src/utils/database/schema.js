@@ -175,7 +175,6 @@ export const tableStatements = [
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )`,
 
-    // Atleti Manager player statistics
     `CREATE TABLE IF NOT EXISTS ${t.atleti_stats} (
         guild_id VARCHAR(20),
         user_id VARCHAR(20),
@@ -214,8 +213,6 @@ export const indexStatements = [
     `CREATE INDEX IF NOT EXISTS idx_verification_audit_created_at ON ${t.verification_audit}(created_at)`,
     `CREATE INDEX IF NOT EXISTS idx_temp_data_expires_at ON ${t.temp_data}(expires_at)`,
     `CREATE INDEX IF NOT EXISTS idx_cache_data_expires_at ON ${t.cache_data}(expires_at)`,
-
-    // Atleti Manager statistics indexes
     `CREATE INDEX IF NOT EXISTS idx_atleti_stats_guild_id ON ${t.atleti_stats}(guild_id)`,
     `CREATE INDEX IF NOT EXISTS idx_atleti_stats_friendly_goals ON ${t.atleti_stats}(friendly_goals)`,
     `CREATE INDEX IF NOT EXISTS idx_atleti_stats_league_goals ON ${t.atleti_stats}(league_goals)`,
@@ -233,10 +230,6 @@ export const UPDATE_TIMESTAMP_FUNCTION = `
     $$ language 'plpgsql';
 `;
 
-/**
- * Tables that carry an updated_at column maintained by the shared trigger.
- * `name` is the trigger identifier, `table` is the concrete table name.
- */
 export const triggerDefinitions = [
     { name: 'update_guilds_updated_at', table: t.guilds },
     { name: 'update_users_updated_at', table: t.users },
