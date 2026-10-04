@@ -1,9 +1,10 @@
+```js
 /**
  * Single source of truth for the PostgreSQL schema.
  *
  * Both the runtime auto-create path (src/utils/postgresDatabase.js) and the
- * standalone migration script (scripts/migrate.js) build the database from these
- * definitions, so the schema can never diverge between them.
+ * standalone migration script (scripts/migrate.js) build the database from
+ * these definitions, so the schema can never diverge between them.
  */
 
 import { pgConfig } from '../../config/database/postgres.js';
@@ -173,6 +174,25 @@ export const tableStatements = [
         expires_at TIMESTAMP,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )`,
+
+    // Atleti Manager player statistics
+    `CREATE TABLE IF NOT EXISTS ${t.atleti_stats} (
+        guild_id VARCHAR(20),
+        user_id VARCHAR(20),
+        friendly_goals INTEGER DEFAULT 0,
+        league_goals INTEGER DEFAULT 0,
+        assists INTEGER DEFAULT 0,
+        clean_sheets INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (guild_id, user_id),
+        FOREIGN KEY (guild_id) REFERENCES ${t.guilds}(id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES ${t.users}(id) ON DELETE CASCADE,
+        CHECK (friendly_goals >= 0),
+        CHECK (league_goals >= 0),
+        CHECK (assists >= 0),
+        CHECK (clean_sheets >= 0)
+    )`,
 ];
 
 export const indexStatements = [
@@ -194,6 +214,13 @@ export const indexStatements = [
     `CREATE INDEX IF NOT EXISTS idx_verification_audit_created_at ON ${t.verification_audit}(created_at)`,
     `CREATE INDEX IF NOT EXISTS idx_temp_data_expires_at ON ${t.temp_data}(expires_at)`,
     `CREATE INDEX IF NOT EXISTS idx_cache_data_expires_at ON ${t.cache_data}(expires_at)`,
+
+    // Atleti Manager statistics indexes
+    `CREATE INDEX IF NOT EXISTS idx_atleti_stats_guild_id ON ${t.atleti_stats}(guild_id)`,
+    `CREATE INDEX IF NOT EXISTS idx_atleti_stats_friendly_goals ON ${t.atleti_stats}(friendly_goals)`,
+    `CREATE INDEX IF NOT EXISTS idx_atleti_stats_league_goals ON ${t.atleti_stats}(league_goals)`,
+    `CREATE INDEX IF NOT EXISTS idx_atleti_stats_assists ON ${t.atleti_stats}(assists)`,
+    `CREATE INDEX IF NOT EXISTS idx_atleti_stats_clean_sheets ON ${t.atleti_stats}(clean_sheets)`,
 ];
 
 export const UPDATE_TIMESTAMP_FUNCTION = `
@@ -224,4 +251,6 @@ export const triggerDefinitions = [
     { name: 'update_giveaways_updated_at', table: t.giveaways },
     { name: 'update_tickets_updated_at', table: t.tickets },
     { name: 'update_afk_status_updated_at', table: t.afk_status },
+    { name: 'update_atleti_stats_updated_at', table: t.atleti_stats },
 ];
+```
