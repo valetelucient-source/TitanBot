@@ -1,10 +1,11 @@
-import { SlashCommandBuilder } from 'discord.js';
+import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
 import { addPlayerStats } from '../../services/atletiStatsService.js';
 
 export default {
     data: new SlashCommandBuilder()
         .setName('add')
         .setDescription('Add stats to an Atleti player')
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
         .addUserOption(option =>
             option
                 .setName('player')
