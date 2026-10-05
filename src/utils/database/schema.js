@@ -32,6 +32,10 @@ export const tableStatements = [
     `CREATE TABLE IF NOT EXISTS ${t.guild_users} (
         guild_id VARCHAR(20),
         user_id VARCHAR(20),
+        friendly_goals INTEGER DEFAULT 0,
+        league_goals INTEGER DEFAULT 0,
+        assists INTEGER DEFAULT 0,
+        clean_sheets INTEGER DEFAULT 0,
         joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (guild_id, user_id),
