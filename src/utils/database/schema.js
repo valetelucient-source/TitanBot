@@ -1,12 +1,3 @@
-```js
-/**
- * Single source of truth for the PostgreSQL schema.
- *
- * Both the runtime auto-create path (src/utils/postgresDatabase.js) and the
- * standalone migration script (scripts/migrate.js) build the database from
- * these definitions, so the schema can never diverge between them.
- */
-
 import { pgConfig } from '../../config/database/postgres.js';
 
 const t = pgConfig.tables;
@@ -32,10 +23,6 @@ export const tableStatements = [
     `CREATE TABLE IF NOT EXISTS ${t.guild_users} (
         guild_id VARCHAR(20),
         user_id VARCHAR(20),
-        friendly_goals INTEGER DEFAULT 0,
-        league_goals INTEGER DEFAULT 0,
-        assists INTEGER DEFAULT 0,
-        clean_sheets INTEGER DEFAULT 0,
         joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (guild_id, user_id),
@@ -132,53 +119,6 @@ export const tableStatements = [
         FOREIGN KEY (user_id) REFERENCES ${t.users}(id) ON DELETE CASCADE
     )`,
 
-    `CREATE TABLE IF NOT EXISTS ${t.verification_audit} (
-        id SERIAL PRIMARY KEY,
-        guild_id VARCHAR(20) NOT NULL,
-        user_id VARCHAR(20) NOT NULL,
-        action VARCHAR(50) NOT NULL,
-        source VARCHAR(50),
-        moderator_id VARCHAR(20),
-        metadata JSONB DEFAULT '{}',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )`,
-
-    `CREATE TABLE IF NOT EXISTS ${t.invite_tracking} (
-        guild_id VARCHAR(20),
-        inviter_id VARCHAR(20),
-        invite_code VARCHAR(20),
-        uses INTEGER DEFAULT 0,
-        data JSONB DEFAULT '{}',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY (guild_id, invite_code),
-        FOREIGN KEY (guild_id) REFERENCES ${t.guilds}(id) ON DELETE CASCADE
-    )`,
-
-    `CREATE TABLE IF NOT EXISTS ${t.application_roles} (
-        guild_id VARCHAR(20),
-        role_id VARCHAR(20),
-        data JSONB DEFAULT '{}',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY (guild_id, role_id),
-        FOREIGN KEY (guild_id) REFERENCES ${t.guilds}(id) ON DELETE CASCADE
-    )`,
-
-    `CREATE TABLE IF NOT EXISTS ${t.temp_data} (
-        key VARCHAR(255) PRIMARY KEY,
-        value JSONB NOT NULL,
-        expires_at TIMESTAMP,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )`,
-
-    `CREATE TABLE IF NOT EXISTS ${t.cache_data} (
-        key VARCHAR(255) PRIMARY KEY,
-        value JSONB NOT NULL,
-        expires_at TIMESTAMP,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )`,
-
     `CREATE TABLE IF NOT EXISTS ${t.atleti_stats} (
         guild_id VARCHAR(20),
         user_id VARCHAR(20),
@@ -206,17 +146,10 @@ export const indexStatements = [
     `CREATE INDEX IF NOT EXISTS idx_giveaways_guild_id ON ${t.giveaways}(guild_id)`,
     `CREATE INDEX IF NOT EXISTS idx_giveaways_ends_at ON ${t.giveaways}(ends_at)`,
     `CREATE INDEX IF NOT EXISTS idx_tickets_guild_id ON ${t.tickets}(guild_id)`,
-    `CREATE INDEX IF NOT EXISTS idx_tickets_expires_at ON ${t.tickets}(expires_at)`,
     `CREATE INDEX IF NOT EXISTS idx_afk_status_guild_id ON ${t.afk_status}(guild_id)`,
-    `CREATE INDEX IF NOT EXISTS idx_afk_status_expires_at ON ${t.afk_status}(expires_at)`,
     `CREATE INDEX IF NOT EXISTS idx_user_levels_guild_id ON ${t.user_levels}(guild_id)`,
     `CREATE INDEX IF NOT EXISTS idx_user_levels_xp ON ${t.user_levels}(xp)`,
     `CREATE INDEX IF NOT EXISTS idx_economy_guild_id ON ${t.economy}(guild_id)`,
-    `CREATE INDEX IF NOT EXISTS idx_verification_audit_guild_id ON ${t.verification_audit}(guild_id)`,
-    `CREATE INDEX IF NOT EXISTS idx_verification_audit_user_id ON ${t.verification_audit}(user_id)`,
-    `CREATE INDEX IF NOT EXISTS idx_verification_audit_created_at ON ${t.verification_audit}(created_at)`,
-    `CREATE INDEX IF NOT EXISTS idx_temp_data_expires_at ON ${t.temp_data}(expires_at)`,
-    `CREATE INDEX IF NOT EXISTS idx_cache_data_expires_at ON ${t.cache_data}(expires_at)`,
     `CREATE INDEX IF NOT EXISTS idx_atleti_stats_guild_id ON ${t.atleti_stats}(guild_id)`,
     `CREATE INDEX IF NOT EXISTS idx_atleti_stats_friendly_goals ON ${t.atleti_stats}(friendly_goals)`,
     `CREATE INDEX IF NOT EXISTS idx_atleti_stats_league_goals ON ${t.atleti_stats}(league_goals)`,
@@ -250,4 +183,3 @@ export const triggerDefinitions = [
     { name: 'update_afk_status_updated_at', table: t.afk_status },
     { name: 'update_atleti_stats_updated_at', table: t.atleti_stats },
 ];
-```
