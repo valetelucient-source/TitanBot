@@ -1,4 +1,4 @@
-import postgresDatabase from '../utils/postgresDatabase.js';
+import { pgDb } from '../utils/postgresDatabase.js';
 
 export async function addPlayerStats({
     guildId,
@@ -8,8 +8,30 @@ export async function addPlayerStats({
     assists = 0,
     cleanSheets = 0
 }) {
-    const query = `
-        INSERT INTO atleti_stats (
+    if (!pgDb.isAvailable()) {
+        throw new Error('PostgreSQL database is not available.');
+    }
+
+    // Make sure the guild exists
+    await pgDb.pool.query(
+        `INSERT INTO ${pgDb.constructor.name === 'PostgreSQLDatabase'
+            ? 'guilds'
+            : 'guilds'} (id)
+         VALUES ($1)
+         ON CONFLICT (id) DO NOTHING`,
+        [guildId]
+    );
+
+    // Make sure the user exists
+    await pgDb.pool.query(
+        `INSERT INTO users (id)
+         VALUES ($1)
+         ON CONFLICT (id) DO NOTHING`,
+        [userId]
+    );
+
+    const result = await pgDb.pool.query(
+        `INSERT INTO atleti_stats (
             guild_id,
             user_id,
             friendly_goals,
@@ -25,17 +47,16 @@ export async function addPlayerStats({
             assists = atleti_stats.assists + EXCLUDED.assists,
             clean_sheets = atleti_stats.clean_sheets + EXCLUDED.clean_sheets,
             updated_at = CURRENT_TIMESTAMP
-        RETURNING *;
-    `;
-
-    const result = await postgresDatabase.query(query, [
-        guildId,
-        userId,
-        friendlyGoals,
-        leagueGoals,
-        assists,
-        cleanSheets
-    ]);
+        RETURNING *`,
+        [
+            guildId,
+            userId,
+            friendlyGoals,
+            leagueGoals,
+            assists,
+            cleanSheets
+        ]
+    );
 
     return result.rows[0];
 }
