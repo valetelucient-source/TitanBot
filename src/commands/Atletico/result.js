@@ -34,6 +34,15 @@ export default {
         ),
 
     async execute(interaction) {
+        const channelName = interaction.channel?.name;
+
+        if (channelName !== '📊︱𝙇𝙚𝙖𝙜𝙪𝙚-𝙍𝙚𝙨𝙪𝙡𝙩𝙨') {
+            return interaction.reply({
+                content: '❌ The `/result` command can only be used in the **📊︱𝙇𝙚𝙖𝙜𝙪𝙚-𝙍𝙚𝙨𝙪𝙡𝙩𝙨** channel.',
+                ephemeral: true
+            });
+        }
+
         const player = interaction.options.getUser('player');
         const goals = interaction.options.getInteger('goals');
         const assists = interaction.options.getInteger('assists');
@@ -51,18 +60,19 @@ export default {
             await interaction.reply(
                 `🏆 **Atleti League Result**\n\n` +
                 `👤 Player: **${player.username}**\n` +
-                `⚽ League Goals Added: **${goals}**\n` +
-                `🅰️ Assists Added: **${assists}**\n` +
-                `🧤 Clean Sheets Added: **${cleanSheets}**\n\n` +
-                `📊 **Total League Goals:** ${stats.league_goals}\n` +
-                `📊 **Total Assists:** ${stats.assists}\n` +
-                `📊 **Total Clean Sheets:** ${stats.clean_sheets}`
+                `⚽ League Goals: **+${goals}**\n` +
+                `🅰️ Assists: **+${assists}**\n` +
+                `🧤 Clean Sheets: **+${cleanSheets}**\n\n` +
+                `📊 **Current Totals**\n` +
+                `⚽ League Goals: **${stats.league_goals}**\n` +
+                `🅰️ Assists: **${stats.assists}**\n` +
+                `🧤 Clean Sheets: **${stats.clean_sheets}**`
             );
         } catch (error) {
-            console.error('Failed to save Atleti stats:', error);
+            console.error('Failed to save Atleti league result:', error);
 
             await interaction.reply({
-                content: '❌ I could not save the Atleti stats right now.',
+                content: '❌ I could not save the league result right now.',
                 ephemeral: true
             });
         }
