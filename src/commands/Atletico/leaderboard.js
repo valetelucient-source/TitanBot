@@ -22,7 +22,11 @@ export default {
                     clean_sheets
                 FROM ${pgConfig.tables.atleti_stats}
                 WHERE guild_id = $1
-                ORDER BY league_goals DESC, friendly_goals DESC, assists DESC
+                ORDER BY
+                    (league_goals + FLOOR(friendly_goals / 5.0)) DESC,
+                    league_goals DESC,
+                    friendly_goals DESC,
+                    assists DESC
                 LIMIT 10
             `, [interaction.guildId]);
 
@@ -33,21 +37,28 @@ export default {
             }
 
             const lines = result.rows.map((player, index) => {
-                const leagueGoals = Number(player.league_goals) || 0;
                 const friendlyGoals = Number(player.friendly_goals) || 0;
+                const leagueGoals = Number(player.league_goals) || 0;
                 const assists = Number(player.assists) || 0;
                 const cleanSheets = Number(player.clean_sheets) || 0;
 
-                const totalGoalValue =
-                    leagueGoals + Math.floor(friendlyGoals / 5);
+                const friendlyGoalValue = Math.floor(friendlyGoals / 5);
+                const goalValue = leagueGoals + friendlyGoalValue;
+
+                let medal = `${index + 1}.`;
+
+                if (index === 0) medal = '🥇';
+                if (index === 1) medal = '🥈';
+                if (index === 2) medal = '🥉';
 
                 return (
-                    `**${index + 1}.** <@${player.user_id}>\n` +
-                    `⚽ League Goals: **${leagueGoals}** | ` +
-                    `🏟️ Friendly Goals: **${friendlyGoals}**\n` +
-                    `🅰️ Assists: **${assists}** | ` +
-                    `🧤 Clean Sheets: **${cleanSheets}**\n` +
-                    `🏆 Goal Value: **${totalGoalValue}**`
+                    `${medal} <@${player.user_id}>\n` +
+                    `🏆 **Goal Value:** ${goalValue}\n` +
+                    `⚽ League Goals: **${leagueGoals}**\n` +
+                    `🏟️ Friendly Goals: **${friendlyGoals}** ` +
+                    `(${friendlyGoalValue} value)\n` +
+                    `🅰️ Assists: **${assists}**\n` +
+                    `🧤 Clean Sheets: **${cleanSheets}**`
                 );
             });
 
