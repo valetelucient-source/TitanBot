@@ -1,4 +1,3 @@
-```js
 const friendlies = new Map();
 
 export function createFriendly(messageId, message) {
@@ -133,4 +132,3 @@ export function getResult(messageId) {
 
     return friendly ? friendly.result : null;
 }
-```
